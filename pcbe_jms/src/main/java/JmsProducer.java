@@ -15,7 +15,11 @@ public class JmsProducer {
 
         @Override
         public void onMessage(Message message) {
-            System.out.println("LISTENER: " + message);
+            try {
+                System.out.println("LISTENER: " + ((ObjectMessage)message).getObject());
+            } catch (JMSException e) {
+                e.printStackTrace();
+            }
             //latch.countDown();
         }
     }
@@ -26,10 +30,11 @@ public class JmsProducer {
         TopicSession consumerSession = null;
         try {
             // Producer
-            TopicConnectionFactory connectionFactory = new ActiveMQConnectionFactory(
+            ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(
                 "tcp://localhost:61616");
+            connectionFactory.setTrustAllPackages(true);
             connection = connectionFactory.createTopicConnection();
-            connection.setClientID("DurabilityTest");
+            //connection.setClientID("DurabilityTest");
             connection.start();
             producerSession = connection.createTopicSession(false,
                 Session.AUTO_ACKNOWLEDGE);
@@ -53,7 +58,7 @@ public class JmsProducer {
             //publisher.send(msg, javax.jms.DeliveryMode.PERSISTENT, javax.jms.Message.DEFAULT_PRIORITY, Message.DEFAULT_TIME_TO_LIVE);
             //publisher.send(objectMessage);
             // Consumer1 subscribes to customerTopic
-            MessageConsumer consumer1 = consumerSession.createDurableSubscriber(consumerTopic, "consumer1", "", false);
+            MessageConsumer consumer1 = producerSession.createDurableSubscriber(producerTopic, "consumer1", "", false);
             TopicListener topicListener1 = new TopicListener();
             consumer1.setMessageListener(topicListener1);
 
@@ -80,9 +85,9 @@ public class JmsProducer {
             publisher.send(objectMessage);
 
         } finally {
-            if (producerSession != null) {
-                producerSession.close();
-            }
+//            if (producerSession != null) {
+//                producerSession.close();
+//            }
 //            if (consumerSession != null) {
 //                consumerSession.close();
 //            }

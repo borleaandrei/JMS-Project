@@ -18,7 +18,7 @@ public class Dispatcher {
     private TopicConnectionFactory connectionFactory;
     long nrSubscription = 0;
     private ConcurrentMap<String, TopicSession> listenerSessions = new ConcurrentHashMap<>();
-    private Random rand =  new Random();
+    private Random rand = new Random();
 
     public void startConnection() {
         BrokerService broker = null;
@@ -45,7 +45,7 @@ public class Dispatcher {
             ObjectMessage objectMessage = session.createObjectMessage();
             try {
                 objectMessage.setObject(message);
-            } catch(JMSException e) {
+            } catch (JMSException e) {
                 e.printStackTrace();
             }
             MessageProducer publisher = session.createProducer(topic);
@@ -56,21 +56,37 @@ public class Dispatcher {
         }
     }
 
-    public void subscribe(String newsTopic, MessageListener newsReader) throws Exception {
-        TopicSession session = listenerSessions.get(newsTopic);
+    public void newsRead(News news) {
+        publishMessage(news.getDescription(), news);
+    }
+
+    public void subscribe(String newsTopic, NewsEditor source, MessageListener messageListener) throws Exception {
+        String topicName;
+        if(source != null) {
+            topicName = source.getEditorName() + "/" + newsTopic;
+        } else {
+            topicName = newsTopic;
+        }
+        //String topicName = newsTopic;
+        TopicSession session = listenerSessions.get(topicName);
         if (session == null) {
             session = connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-            listenerSessions.put(newsTopic, session);
+            listenerSessions.put(topicName, session);
         }
-        Topic topic = session.createTopic(newsTopic);
-        MessageConsumer consumer = session.createDurableSubscriber(topic, newsReader.toString()+" "+rand.nextLong(), "", false);
+        Topic topic = session.createTopic(topicName);
+        MessageConsumer consumer = session.createDurableSubscriber(topic, messageListener.toString() + " " + rand.nextLong(), "", false);
         // the scond parameter has to be unique that's why a random value is added
-        consumer.setMessageListener(newsReader);
+        consumer.setMessageListener(messageListener);
         nrSubscription++;
     }
 
-    public void subscribeForUpdates(String newsTopic, MessageListener newsReader) throws Exception {
-        subscribe(newsTopic+"/update", newsReader);
+    public void subscribeForReadEvents(String newsDescription, NewsEditor newsEditor) throws Exception {
+        subscribe(newsDescription, null, newsEditor);
+    }
+
+    public void subscribeForUpdates(String newsTopic, NewsEditor source, MessageListener newsReader) throws Exception {
+//        subscribe(newsTopic + "/update", source, newsReader);
+        subscribe(newsTopic, source, newsReader);
     }
 
 }

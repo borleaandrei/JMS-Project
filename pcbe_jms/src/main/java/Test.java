@@ -25,25 +25,30 @@ public class Test {
 
         NewsReader newsReader = new NewsReader("Jimmy", dispatcher);
         NewsReader newsReader1 = new NewsReader("Danny", dispatcher);
+        NewsReader newsReader2 = new NewsReader("Trump", dispatcher);
 
         NewsEditor newsEditor = new NewsEditor("Adevarul", dispatcher);
+        NewsEditor newsEditor1 = new NewsEditor("Minciuna", dispatcher);
 
-        long timeNow = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
-        News news1 = new News("romania", timeNow, timeNow, "source", "someone");
-        News news2 = new News("wather", timeNow, timeNow, "source", "someone");
+        long timeNow = System.currentTimeMillis();
+        News news1 = new News("Romania 200", timeNow, timeNow, "source", "someone");
+        News news2 = new News("Transilvania e reanexata la Imperiul Austro-Ungar", timeNow, timeNow, "source", "someone");
+
 
         try {
-            dispatcher.subscribe("sports", newsReader);
-            dispatcher.subscribe("wather", newsReader);
-            dispatcher.subscribe("sports", newsReader1);
-            dispatcher.subscribeForUpdates("sports", newsReader1);
+            dispatcher.subscribe("patriotism", newsEditor, newsReader);
+            dispatcher.subscribe("patriotism", newsEditor, newsReader1);
+            dispatcher.subscribe("autonomie", newsEditor1, newsReader2);
+            dispatcher.subscribeForReadEvents(news1.getDescription(), newsEditor);
+            dispatcher.subscribeForReadEvents(news2.getDescription(), newsEditor1);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        newsEditor.publishNews(news1,"sports");
-        //newsEditor.publishNews(news2,"wather");
-        news1.setDescription(news1.getDescription()+" update");
+        newsEditor.publishNews(news1, "patriotism");
+        newsEditor1.publishNews(news2, "autonomie");
 
+        news1.setDescription(news1.getDescription() + " cea mai frumoasa tara");
+        newsEditor.deleteNews(news1.getDescription());
     }
 }

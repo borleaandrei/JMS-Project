@@ -6,6 +6,7 @@ import java.io.Serializable;
 
 public class News implements Serializable {
 
+    private String title;
     private String description;
     private long dateFirstPublication;
     private long dateOfLastUpdate;
@@ -29,6 +30,10 @@ public class News implements Serializable {
 
     public void setChangeListener(ChangeListener changeListener){
         this.changeListener = changeListener;
+    }
+
+    public void setDateOfLastUpdate(long dateOfLastUpdate) {
+        this.dateOfLastUpdate = dateOfLastUpdate;
     }
 
     public String getDescription() {
@@ -55,17 +60,17 @@ public class News implements Serializable {
         return newsTopic;
     }
 
+    public int getNumberOfVisualizations() {
+        return numberOfVisualizations;
+    }
+
     public void incrementVisualizationNumb() {
         numberOfVisualizations++;
     }
 
     public void setDescription(String description) {
         this.description = description;
-        changeListener.changeDetected(this);
+        changeListener.changeDetected(this, description);
     }
 
-    public void setInformationSource(String informationSource) {
-        this.informationSource = informationSource;
-        changeListener.changeDetected(this);
-    }
 }
