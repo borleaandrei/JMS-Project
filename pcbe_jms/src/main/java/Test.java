@@ -24,6 +24,9 @@ public class Test {
         dispatcher.startConnection();
 
         NewsReader newsReader = new NewsReader("Jimmy", dispatcher);
+        NewsReader newsReader1 = new NewsReader("Danny", dispatcher);
+        NewsReader newsReader2 = new NewsReader("Eva", dispatcher);
+
         NewsEditor newsEditor = new NewsEditor("Adevarul", dispatcher);
 
         long timeNow = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
@@ -31,6 +34,7 @@ public class Test {
 
         try {
             dispatcher.subscribe("sports", newsReader);
+            dispatcher.subscribe("sports", newsReader1);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -22,7 +22,8 @@ public class Dispatcher {
         try {
             broker = BrokerFactory.createBroker(new URI("broker:(tcp://localhost:61616)"));
             broker.start();
-            TopicConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+            ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+            connectionFactory.setTrustAllPackages(true);
             connection = connectionFactory.createTopicConnection();
             connection.setClientID("DurabilityTest");
             connection.start();
