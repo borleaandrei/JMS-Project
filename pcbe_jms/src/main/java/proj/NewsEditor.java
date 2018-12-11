@@ -6,6 +6,7 @@ import proj.News;
 
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,5 +39,7 @@ public class NewsEditor implements MessageListener, ChangeListener {
     @Override
     public void changeDetected(News newsChanged) {
         //TODO: republish newsChanged
+        System.out.println(" changeDetected "+newsChanged);
+        dispatcher.publishMessage(newsChanged.getNewsTopic()+"/update", newsChanged);
     }
 }

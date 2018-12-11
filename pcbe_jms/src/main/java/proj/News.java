@@ -13,7 +13,7 @@ public class News implements Serializable {
     private String author;
     private String newsTopic;
     private int numberOfVisualizations = 0;
-    private ChangeListener changeListener;
+    private transient ChangeListener changeListener; // made field transient so it wouldn't be serialized, no need for it to be serialised
 
     public News(String description, long dateFirstPublication, long dateOfLastUpdate, String informationSource, String author) {
         this.description = description;
@@ -51,17 +51,21 @@ public class News implements Serializable {
         return author;
     }
 
+    public String getNewsTopic() {
+        return newsTopic;
+    }
+
     public void incrementVisualizationNumb() {
         numberOfVisualizations++;
     }
 
     public void setDescription(String description) {
-        changeListener.changeDetected(this);
         this.description = description;
+        changeListener.changeDetected(this);
     }
 
     public void setInformationSource(String informationSource) {
-        changeListener.changeDetected(this);
         this.informationSource = informationSource;
+        changeListener.changeDetected(this);
     }
 }

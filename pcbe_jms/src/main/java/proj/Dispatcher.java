@@ -5,7 +5,9 @@ import org.apache.activemq.broker.BrokerFactory;
 import org.apache.activemq.broker.BrokerService;
 
 import javax.jms.*;
+import java.io.Serializable;
 import java.net.URI;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -14,8 +16,9 @@ public class Dispatcher {
     private BrokerService broker;
     private TopicConnection connection; // conneciton is thread safe
     private TopicConnectionFactory connectionFactory;
-
+    long nrSubscription = 0;
     private ConcurrentMap<String, TopicSession> listenerSessions = new ConcurrentHashMap<>();
+    private Random rand =  new Random();
 
     public void startConnection() {
         BrokerService broker = null;
@@ -40,8 +43,11 @@ public class Dispatcher {
             topic = session.createTopic(newsTopic);
 
             ObjectMessage objectMessage = session.createObjectMessage();
-            objectMessage.setObject(message);
-
+            try {
+                objectMessage.setObject(message);
+            } catch(JMSException e) {
+                e.printStackTrace();
+            }
             MessageProducer publisher = session.createProducer(topic);
             publisher.send(objectMessage);
             session.close();
@@ -53,13 +59,18 @@ public class Dispatcher {
     public void subscribe(String newsTopic, MessageListener newsReader) throws Exception {
         TopicSession session = listenerSessions.get(newsTopic);
         if (session == null) {
-            System.out.println("session was null");
             session = connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
             listenerSessions.put(newsTopic, session);
         }
         Topic topic = session.createTopic(newsTopic);
-        MessageConsumer consumer = session.createDurableSubscriber(topic, newsReader.toString(), "", false);
+        MessageConsumer consumer = session.createDurableSubscriber(topic, newsReader.toString()+" "+rand.nextLong(), "", false);
+        // the scond parameter has to be unique that's why a random value is added
         consumer.setMessageListener(newsReader);
+        nrSubscription++;
+    }
+
+    public void subscribeForUpdates(String newsTopic, MessageListener newsReader) throws Exception {
+        subscribe(newsTopic+"/update", newsReader);
     }
 
 }
